@@ -2,7 +2,7 @@
 node_modules/
 
 # 数据文件（个人学习数据）
-data/study.json
+# data/study.json
 
 # 日志
 npm-debug.log*
