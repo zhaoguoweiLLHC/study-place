@@ -276,5 +276,24 @@
       "createdAt": "2026-04-14"
     }
   ],
-  "plans": []
+  "plans": [],
+  "records": [],
+  "rewards": [
+    { "id": 1, "name": "30分钟游戏时间", "description": "兑换30分钟游戏时间", "cost": 50, "icon": "🎮" },
+    { "id": 2, "name": "1小时游戏时间", "description": "兑换1小时游戏时间", "cost": 90, "icon": "🎮" },
+    { "id": 3, "name": "看一集动漫", "description": "兑换看一集动漫的时间", "cost": 60, "icon": "📺" },
+    { "id": 4, "name": "买一杯奶茶", "description": "奖励自己一杯奶茶", "cost": 100, "icon": "🧋" },
+    { "id": 5, "name": "休息半天", "description": "兑换半天的自由时间", "cost": 200, "icon": "😴" }
+  ],
+  "redemptions": [],
+  "stats": {
+    "totalPoints": 0,
+    "availablePoints": 0,
+    "totalStudyTime": 0,
+    "currentStreak": 0,
+    "longestStreak": 0,
+    "lastStudyDate": null,
+    "totalRecords": 0,
+    "completedChapters": 0
+  }
 }
