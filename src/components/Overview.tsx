@@ -8,24 +8,28 @@ interface OverviewProps {
 }
 
 export default function Overview({ data }: OverviewProps) {
-  // 计算今日学习时长
   const today = new Date().toISOString().split('T')[0];
   const todayRecords = data.records.filter((r) => r.createdAt === today);
   const todayStudyTime = todayRecords.reduce((sum, r) => sum + r.duration, 0);
   const todayPoints = todayRecords.reduce((sum, r) => sum + r.points, 0);
 
-  // 格式化时长
   const formatDuration = (minutes: number) => {
-    if (minutes < 60) {
-      return `${minutes}分钟`;
-    }
+    if (minutes < 60) return `${minutes}分钟`;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return mins > 0 ? `${hours}小时${mins}分钟` : `${hours}小时`;
   };
 
-  // 获取最近学习记录
   const recentRecords = data.records.slice(0, 5);
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'book': return '📚';
+      case 'video': return '🎥';
+      case 'practice': return '✏️';
+      default: return '📝';
+    }
+  };
 
   return (
     <>
@@ -34,10 +38,8 @@ export default function Overview({ data }: OverviewProps) {
         <p className="page-subtitle">坚持学习，积累积分，兑换奖励</p>
       </header>
 
-      {/* 积分卡片 */}
       <PointsCard stats={data.stats} />
 
-      {/* 统计网格 */}
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon">💎</div>
@@ -69,7 +71,40 @@ export default function Overview({ data }: OverviewProps) {
         </div>
       </div>
 
-      {/* 今日概览 */}
+      <div className="study-type-stats">
+        <h3 className="section-title">📊 学习类型分布</h3>
+        <div className="type-stats-grid">
+          <div className="type-stat-item">
+            <span className="type-stat-icon">📚</span>
+            <div className="type-stat-info">
+              <span className="type-stat-value">{formatDuration(data.stats.bookTime)}</span>
+              <span className="type-stat-label">书籍学习</span>
+            </div>
+          </div>
+          <div className="type-stat-item">
+            <span className="type-stat-icon">🎥</span>
+            <div className="type-stat-info">
+              <span className="type-stat-value">{formatDuration(data.stats.videoTime)}</span>
+              <span className="type-stat-label">视频学习</span>
+            </div>
+          </div>
+          <div className="type-stat-item">
+            <span className="type-stat-icon">✏️</span>
+            <div className="type-stat-info">
+              <span className="type-stat-value">{formatDuration(data.stats.practiceTime)}</span>
+              <span className="type-stat-label">练习时间</span>
+            </div>
+          </div>
+          <div className="type-stat-item">
+            <span className="type-stat-icon">📝</span>
+            <div className="type-stat-info">
+              <span className="type-stat-value">{formatDuration(data.stats.otherTime)}</span>
+              <span className="type-stat-label">其他学习</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="today-overview">
         <h3 className="section-title">📅 今日学习</h3>
         <div className="today-stats">
@@ -88,7 +123,6 @@ export default function Overview({ data }: OverviewProps) {
         </div>
       </div>
 
-      {/* 最近记录 */}
       <div className="recent-records">
         <h3 className="section-title">📝 最近学习记录</h3>
         {recentRecords.length === 0 ? (
@@ -101,10 +135,13 @@ export default function Overview({ data }: OverviewProps) {
           <div className="recent-records-list">
             {recentRecords.map((record) => (
               <div key={record.id} className="recent-record-item">
-                <div className="recent-record-chapter">{record.chapterName}</div>
-                <div className="recent-record-meta">
-                  <span>⏱️ {formatDuration(record.duration)}</span>
-                  <span>+{record.points} 💎</span>
+                <div className="recent-record-type">{getTypeIcon(record.type)}</div>
+                <div className="recent-record-info">
+                  <div className="recent-record-title">{record.title || (record.type === 'book' ? record.bookName : record.videoName) || '学习记录'}</div>
+                  <div className="recent-record-meta">
+                    <span>⏱️ {formatDuration(record.duration)}</span>
+                    <span>+{record.points} 💎</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -112,7 +149,6 @@ export default function Overview({ data }: OverviewProps) {
         )}
       </div>
 
-      {/* 积分规则说明 */}
       <div className="points-rules">
         <h3 className="section-title">💡 积分规则</h3>
         <div className="rules-list">
@@ -125,6 +161,16 @@ export default function Overview({ data }: OverviewProps) {
             <span className="rule-icon">⏱️</span>
             <span className="rule-text">每分钟学习</span>
             <span className="rule-points">+1分</span>
+          </div>
+          <div className="rule-item">
+            <span className="rule-icon">📚</span>
+            <span className="rule-text">书籍学习</span>
+            <span className="rule-points">+2分</span>
+          </div>
+          <div className="rule-item">
+            <span className="rule-icon">🎬</span>
+            <span className="rule-text">视频完成</span>
+            <span className="rule-points">+15分</span>
           </div>
           <div className="rule-item">
             <span className="rule-icon">🌅</span>

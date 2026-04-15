@@ -3,7 +3,6 @@ import path from 'path';
 import { AppData, UserStats, DEFAULT_REWARDS } from './types';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'study.json');
-const INITIAL_FILE = path.join(process.cwd(), 'data', 'initial.json');
 
 const defaultStats: UserStats = {
   totalPoints: 0,
@@ -13,42 +12,21 @@ const defaultStats: UserStats = {
   longestStreak: 0,
   lastStudyDate: null,
   totalRecords: 0,
-  completedChapters: 0,
+  bookTime: 0,
+  videoTime: 0,
+  practiceTime: 0,
+  otherTime: 0,
 };
 
 export function ensureDataFile(): void {
   if (!fs.existsSync(DATA_FILE)) {
-    if (fs.existsSync(INITIAL_FILE)) {
-      const initialData = JSON.parse(fs.readFileSync(INITIAL_FILE, 'utf-8'));
-      const data: AppData = {
-        chapters: initialData.chapters.map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          status: 'pending',
-          studyDate: null,
-        })),
-        notes: [],
-        questions: [],
-        plans: [],
-        records: [],
-        rewards: DEFAULT_REWARDS,
-        redemptions: [],
-        stats: { ...defaultStats },
-      };
-      fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
-    } else {
-      const data: AppData = {
-        chapters: [],
-        notes: [],
-        questions: [],
-        plans: [],
-        records: [],
-        rewards: DEFAULT_REWARDS,
-        redemptions: [],
-        stats: { ...defaultStats },
-      };
-      fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
-    }
+    const data: AppData = {
+      records: [],
+      rewards: DEFAULT_REWARDS,
+      redemptions: [],
+      stats: { ...defaultStats },
+    };
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
   }
 }
 
@@ -58,6 +36,6 @@ export function readData(): AppData {
   return JSON.parse(data);
 }
 
-export function writeData(data: AppData): void {
+export function writeData( AppData): void {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
 }

@@ -43,13 +43,11 @@ export default function ClientPage({ initialData }: { initialData: AppData }) {
     openModal(
       '记录学习',
       <StudyRecordForm
-        chapters={data.chapters}
         onSubmit={async (formData) => {
           try {
             const result = await actions.createStudyRecord(formData);
             await refreshData();
             closeModal();
-            // 显示获得积分的提示
             alert(`🎉 记录成功！获得 ${result.pointsEarned} 积分！`);
             setCurrentPage('records');
           } catch {
@@ -91,7 +89,7 @@ export default function ClientPage({ initialData }: { initialData: AppData }) {
   }
 
   // 添加奖励
-  async function addReward(reward: { name: string; description: string; cost: number; icon: string }) {
+  async function addReward(reward: { name: string; description: string; cost: number; icon: string; category: 'entertainment' | 'food' | 'rest' | 'other' }) {
     try {
       await actions.addReward(reward);
       await refreshData();

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { readData, writeData } from './data';
-import { POINTS_RULES } from './types';
+import { POINTS_RULES, StudyType } from './types';
 
 // 计算连续学习天数
 function calculateStreak(lastStudyDate: string | null, currentDate: string): { streak: number; isFirstToday: boolean } {
@@ -16,23 +16,24 @@ function calculateStreak(lastStudyDate: string | null, currentDate: string): { s
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) {
-    // 今天已经学习过
     return { streak: 0, isFirstToday: false };
   } else if (diffDays === 1) {
-    // 连续学习
     return { streak: 1, isFirstToday: true };
   } else {
-    // 中断了，重新开始
     return { streak: 1, isFirstToday: true };
   }
 }
 
 // 创建学习记录并计算积分
 export async function createStudyRecord(record: {
-  chapterId: string;
-  chapterName: string;
-  content: string;
+  type: StudyType;
+  title: string;
   duration: number;
+  bookName?: string;
+  totalPages?: number;
+  currentPage?: number;
+  videoName?: string;
+  videoProgress?: number;
 }) {
   const data = readData();
   const today = new Date().toISOString().split('T')[0];
@@ -41,18 +42,26 @@ export async function createStudyRecord(record: {
   let points = POINTS_RULES.RECORD_BASE;
   points += record.duration * POINTS_RULES.PER_MINUTE;
 
+  // 书籍类型额外积分（每页2分）
+  if (record.type === 'book' && record.currentPage && record.totalPages) {
+    points += POINTS_RULES.BOOK_BONUS;
+  }
+
+  // 视频完成奖励
+  if (record.type === 'video' && record.videoProgress === 100) {
+    points += POINTS_RULES.VIDEO_COMPLETE_BONUS;
+  }
+
   // 检查连续学习
   const { streak, isFirstToday } = calculateStreak(data.stats.lastStudyDate, today);
 
   if (isFirstToday) {
     points += POINTS_RULES.FIRST_RECORD_OF_DAY;
-    // 更新连续学习天数
     const newStreak = data.stats.currentStreak + streak;
     data.stats.currentStreak = newStreak;
     if (newStreak > data.stats.longestStreak) {
       data.stats.longestStreak = newStreak;
     }
-    // 连续学习奖励
     points += newStreak * POINTS_RULES.STREAK_BONUS;
   }
 
@@ -62,6 +71,21 @@ export async function createStudyRecord(record: {
   data.stats.totalStudyTime += record.duration;
   data.stats.totalRecords += 1;
   data.stats.lastStudyDate = today;
+
+  // 更新学习类型统计
+  switch (record.type) {
+    case 'book':
+      data.stats.bookTime += record.duration;
+      break;
+    case 'video':
+      data.stats.videoTime += record.duration;
+      break;
+    case 'practice':
+      data.stats.practiceTime += record.duration;
+      break;
+    default:
+      data.stats.otherTime += record.duration;
+  }
 
   // 创建记录
   const newRecord = {
@@ -84,11 +108,25 @@ export async function deleteStudyRecord(id: number) {
 
   if (recordIndex !== -1) {
     const record = data.records[recordIndex];
-    // 退回积分
     data.stats.totalPoints -= record.points;
     data.stats.availablePoints -= record.points;
     data.stats.totalStudyTime -= record.duration;
     data.stats.totalRecords -= 1;
+
+    // 更新学习类型统计
+    switch (record.type) {
+      case 'book':
+        data.stats.bookTime -= record.duration;
+        break;
+      case 'video':
+        data.stats.videoTime -= record.duration;
+        break;
+      case 'practice':
+        data.stats.practiceTime -= record.duration;
+        break;
+      default:
+        data.stats.otherTime -= record.duration;
+    }
 
     data.records.splice(recordIndex, 1);
     writeData(data);
@@ -96,35 +134,6 @@ export async function deleteStudyRecord(id: number) {
     return { success: true, pointsReturned: record.points };
   }
   return { success: false };
-}
-
-// 更新章节状态
-export async function updateChapterStatus(id: string, status: 'pending' | 'studying' | 'completed') {
-  const data = readData();
-  const chapter = data.chapters.find((c) => c.id === id);
-
-  if (chapter) {
-    const wasCompleted = chapter.status === 'completed';
-    chapter.status = status;
-    chapter.studyDate = status === 'completed' ? new Date().toISOString().split('T')[0] : null;
-
-    // 完成章节奖励积分
-    if (status === 'completed' && !wasCompleted) {
-      data.stats.totalPoints += POINTS_RULES.COMPLETE_CHAPTER;
-      data.stats.availablePoints += POINTS_RULES.COMPLETE_CHAPTER;
-      data.stats.completedChapters += 1;
-    } else if (wasCompleted && status !== 'completed') {
-      // 取消完成，扣除积分
-      data.stats.totalPoints -= POINTS_RULES.COMPLETE_CHAPTER;
-      data.stats.availablePoints -= POINTS_RULES.COMPLETE_CHAPTER;
-      data.stats.completedChapters -= 1;
-    }
-
-    writeData(data);
-    revalidatePath('/');
-    return { chapter, stats: data.stats };
-  }
-  return null;
 }
 
 // 兑换奖励
@@ -140,10 +149,8 @@ export async function redeemReward(rewardId: number) {
     return { success: false, error: '积分不足' };
   }
 
-  // 扣除积分
   data.stats.availablePoints -= reward.cost;
 
-  // 创建兑换记录
   const redemption = {
     id: Date.now(),
     rewardId: reward.id,
@@ -159,7 +166,7 @@ export async function redeemReward(rewardId: number) {
 }
 
 // 添加自定义奖励
-export async function addReward(reward: { name: string; description: string; cost: number; icon: string }) {
+export async function addReward(reward: { name: string; description: string; cost: number; icon: string; category: 'entertainment' | 'food' | 'rest' | 'other' }) {
   const data = readData();
   const newReward = {
     id: Date.now(),
@@ -194,126 +201,4 @@ export async function importData(data: Parameters<typeof writeData>[0]) {
   writeData(data);
   revalidatePath('/');
   return { success: true };
-}
-
-// 创建笔记
-export async function createNote(note: { title: string; content: string; chapter: string; tags: string[] }) {
-  const data = readData();
-  const newNote = {
-    id: Date.now(),
-    ...note,
-    createdAt: new Date().toISOString().split('T')[0],
-  };
-  data.notes.unshift(newNote);
-  writeData(data);
-  revalidatePath('/');
-  return newNote;
-}
-
-// 更新笔记
-export async function updateNote(id: number, note: Partial<{ title: string; content: string; chapter: string; tags: string[] }>) {
-  const data = readData();
-  const index = data.notes.findIndex((n) => n.id === id);
-  if (index !== -1) {
-    data.notes[index] = { ...data.notes[index], ...note };
-    writeData(data);
-    revalidatePath('/');
-    return data.notes[index];
-  }
-  return null;
-}
-
-// 删除笔记
-export async function deleteNote(id: number) {
-  const data = readData();
-  const index = data.notes.findIndex((n) => n.id === id);
-  if (index !== -1) {
-    data.notes.splice(index, 1);
-    writeData(data);
-    revalidatePath('/');
-    return { success: true };
-  }
-  return { success: false };
-}
-
-// 创建错题
-export async function createQuestion(question: { type: string; question: string; answer: string; wrongAnswer: string; explanation: string; chapter: string }) {
-  const data = readData();
-  const newQuestion = {
-    id: Date.now(),
-    ...question,
-    mastered: false,
-    createdAt: new Date().toISOString().split('T')[0],
-  };
-  data.questions.unshift(newQuestion);
-  writeData(data);
-  revalidatePath('/');
-  return newQuestion;
-}
-
-// 更新错题
-export async function updateQuestion(id: number, question: Partial<{ type: string; question: string; answer: string; wrongAnswer: string; explanation: string; chapter: string; mastered: boolean }>) {
-  const data = readData();
-  const index = data.questions.findIndex((q) => q.id === id);
-  if (index !== -1) {
-    data.questions[index] = { ...data.questions[index], ...question };
-    writeData(data);
-    revalidatePath('/');
-    return data.questions[index];
-  }
-  return null;
-}
-
-// 删除错题
-export async function deleteQuestion(id: number) {
-  const data = readData();
-  const index = data.questions.findIndex((q) => q.id === id);
-  if (index !== -1) {
-    data.questions.splice(index, 1);
-    writeData(data);
-    revalidatePath('/');
-    return { success: true };
-  }
-  return { success: false };
-}
-
-// 创建计划
-export async function createPlan(plan: { title: string; description: string; date: string }) {
-  const data = readData();
-  const newPlan = {
-    id: Date.now(),
-    ...plan,
-    completed: false,
-    createdAt: new Date().toISOString().split('T')[0],
-  };
-  data.plans.unshift(newPlan);
-  writeData(data);
-  revalidatePath('/');
-  return newPlan;
-}
-
-// 更新计划
-export async function updatePlan(id: number, plan: Partial<{ title: string; description: string; date: string; completed: boolean }>) {
-  const data = readData();
-  const index = data.plans.findIndex((p) => p.id === id);
-  if (index !== -1) {
-    data.plans[index] = { ...data.plans[index], ...plan };
-    writeData(data);
-    revalidatePath('/');
-    return data.plans[index];
-  }
-  return null;
-}
-
-// 删除计划
-export async function deletePlan(id: number) {
-  const data = readData();
-  const index = data.plans.findIndex((p) => p.id === id);
-  if (index !== -1) {
-    data.plans.splice(index, 1);
-    writeData(data);
-    revalidatePath('/');
-    return { success: true };
-  }
-  return { success: false };
 }

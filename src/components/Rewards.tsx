@@ -8,9 +8,18 @@ interface RewardsProps {
   redemptions: Redemption[];
   stats: UserStats;
   onRedeem: (rewardId: number) => void;
-  onAddReward: (reward: { name: string; description: string; cost: number; icon: string }) => void;
+  onAddReward: (reward: { name: string; description: string; cost: number; icon: string; category: 'entertainment' | 'food' | 'rest' | 'other' }) => void;
   onDeleteReward: (id: number) => void;
 }
+
+const CATEGORY_LABELS = {
+  entertainment: { label: '娱乐', icon: '🎮' },
+  food: { label: '餐饮', icon: '🍔' },
+  rest: { label: '休息', icon: '😴' },
+  other: { label: '其他', icon: '🎁' },
+};
+
+const ICON_OPTIONS = ['🎮', '📺', '🎬', '📱', '🧋', '☕', '🍔', '🍰', '😴', '🛏️', '🧘', '📚', '🎁', '🎵', '🏃', '💎', '⭐', '🌟'];
 
 export default function Rewards({
   rewards,
@@ -21,17 +30,19 @@ export default function Rewards({
   onDeleteReward,
 }: RewardsProps) {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   const [newReward, setNewReward] = useState({
     name: '',
     description: '',
     cost: 50,
     icon: '🎁',
+    category: 'other' as 'entertainment' | 'food' | 'rest' | 'other',
   });
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAddReward(newReward);
-    setNewReward({ name: '', description: '', cost: 50, icon: '🎁' });
+    setNewReward({ name: '', description: '', cost: 50, icon: '🎁', category: 'other' });
     setShowAddForm(false);
   };
 
@@ -39,6 +50,20 @@ export default function Rewards({
     const date = new Date(dateStr);
     return `${date.getMonth() + 1}月${date.getDate()}日`;
   };
+
+  // 按分类筛选奖励
+  const filteredRewards = activeCategory === 'all'
+    ? rewards
+    : rewards.filter((r) => r.category === activeCategory);
+
+  // 按分类分组
+  const groupedRewards = rewards.reduce((acc, reward) => {
+    if (!acc[reward.category]) {
+      acc[reward.category] = [];
+    }
+    acc[reward.category].push(reward);
+    return acc;
+  }, {} as Record<string, Reward[]>);
 
   return (
     <div className="rewards-container">
@@ -82,8 +107,21 @@ export default function Rewards({
             value={newReward.description}
             onChange={(e) => setNewReward({ ...newReward, description: e.target.value })}
           />
+          <div className="form-group">
+            <label className="form-label">分类</label>
+            <select
+              className="form-select"
+              value={newReward.category}
+              onChange={(e) => setNewReward({ ...newReward, category: e.target.value as any })}
+            >
+              <option value="entertainment">🎮 娱乐</option>
+              <option value="food">🍔 餐饮</option>
+              <option value="rest">😴 休息</option>
+              <option value="other">🎁 其他</option>
+            </select>
+          </div>
           <div className="icon-selector">
-            {['🎮', '📺', '🧋', '😴', '🍔', '📚', '🎵', '🏃', '🎁'].map((icon) => (
+            {ICON_OPTIONS.map((icon) => (
               <button
                 key={icon}
                 type="button"
@@ -100,9 +138,28 @@ export default function Rewards({
         </form>
       )}
 
+      {/* 分类标签 */}
+      <div className="category-tabs">
+        <button
+          className={`category-tab ${activeCategory === 'all' ? 'active' : ''}`}
+          onClick={() => setActiveCategory('all')}
+        >
+          全部
+        </button>
+        {Object.entries(CATEGORY_LABELS).map(([key, value]) => (
+          <button
+            key={key}
+            className={`category-tab ${activeCategory === key ? 'active' : ''}`}
+            onClick={() => setActiveCategory(key)}
+          >
+            {value.icon} {value.label}
+          </button>
+        ))}
+      </div>
+
       {/* 奖励列表 */}
       <div className="rewards-grid">
-        {rewards.map((reward) => {
+        {filteredRewards.map((reward) => {
           const canAfford = stats.availablePoints >= reward.cost;
           return (
             <div key={reward.id} className={`reward-card ${!canAfford ? 'disabled' : ''}`}>

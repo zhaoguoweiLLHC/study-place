@@ -1,83 +1,174 @@
 'use client';
 
 import { useState } from 'react';
-import { Chapter, POINTS_RULES } from '@/lib/types';
+import { StudyType, POINTS_RULES } from '@/lib/types';
+
+interface StudyRecordFormData {
+  type: StudyType;
+  title: string;
+  duration: number;
+  bookName?: string;
+  totalPages?: number;
+  currentPage?: number;
+  videoName?: string;
+  videoProgress?: number;
+}
 
 interface StudyRecordFormProps {
-  chapters: Chapter[];
-  onSubmit: (data: { chapterId: string; chapterName: string; content: string; duration: number }) => void;
+  onSubmit: ( StudyRecordFormData) => void;
   onCancel: () => void;
 }
 
-export default function StudyRecordForm({ chapters, onSubmit, onCancel }: StudyRecordFormProps) {
-  const [chapterId, setChapterId] = useState('');
-  const [content, setContent] = useState('');
+export default function StudyRecordForm({ onSubmit, onCancel }: StudyRecordFormProps) {
+  const [type, setType] = useState<StudyType>('book');
+  const [title, setTitle] = useState('');
   const [duration, setDuration] = useState(30);
-  const [estimatedPoints, setEstimatedPoints] = useState(POINTS_RULES.RECORD_BASE + 30 * POINTS_RULES.PER_MINUTE);
+  const [bookName, setBookName] = useState('');
+  const [totalPages, setTotalPages] = useState(100);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [videoName, setVideoName] = useState('');
+  const [videoProgress, setVideoProgress] = useState(0);
 
-  const handleChapterChange = (id: string) => {
-    setChapterId(id);
-    const chapter = chapters.find((c) => c.id === id);
-    if (chapter && chapter.name) {
-      // 自动填充章节名称到内容开头
-      if (!content) {
-        setContent(`学习章节：${chapter.name}\n\n`);
-      }
+  const handleTypeChange = (newType: StudyType) => {
+    setType(newType);
+    if (newType !== 'book') {
+      setBookName('');
+      setTotalPages(100);
+      setCurrentPage(1);
     }
-  };
-
-  const handleDurationChange = (value: number) => {
-    setDuration(value);
-    // 预估积分 = 基础分 + 时长分 + 首次奖励（无法预估）+ 连续奖励（无法预估）
-    const basePoints = POINTS_RULES.RECORD_BASE + value * POINTS_RULES.PER_MINUTE;
-    setEstimatedPoints(basePoints);
+    if (newType !== 'video') {
+      setVideoName('');
+      setVideoProgress(0);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const chapter = chapters.find((c) => c.id === chapterId);
-    if (!chapter) return;
 
-    onSubmit({
-      chapterId,
-      chapterName: chapter.name,
-      content,
+    const data: StudyRecordFormData = {
+      type,
+      title,
       duration,
-    });
+    };
+
+    if (type === 'book') {
+      data.bookName = bookName;
+      data.totalPages = totalPages;
+      data.currentPage = currentPage;
+    } else if (type === 'video') {
+      data.videoName = videoName;
+      data.videoProgress = videoProgress;
+    }
+
+    onSubmit(data);
   };
 
-  // 按单元分组章节
-  const units = chapters.reduce((acc, chapter) => {
-    const unitId = chapter.id.split('-')[0];
-    if (!acc[unitId]) {
-      acc[unitId] = [];
+  const calculatePoints = () => {
+    let points = POINTS_RULES.RECORD_BASE + duration * POINTS_RULES.PER_MINUTE;
+    if (type === 'book' && currentPage > 0) {
+      points += POINTS_RULES.BOOK_BONUS;
     }
-    acc[unitId].push(chapter);
-    return acc;
-  }, {} as Record<string, Chapter[]>);
+    if (type === 'video' && videoProgress === 100) {
+      points += POINTS_RULES.VIDEO_COMPLETE_BONUS;
+    }
+    return points;
+  };
+
+  const typeOptions = [
+    { value: 'book', label: '书籍', icon: '📚' },
+    { value: 'video', label: '视频', icon: '🎥' },
+    { value: 'practice', label: '练习', icon: '✏️' },
+    { value: 'other', label: '其他', icon: '📝' },
+  ];
 
   return (
     <form onSubmit={handleSubmit}>
       <div className="form-group">
-        <label className="form-label">选择章节</label>
-        <select
-          className="form-select"
-          value={chapterId}
-          onChange={(e) => handleChapterChange(e.target.value)}
-          required
-        >
-          <option value="">请选择章节</option>
-          {Object.entries(units).map(([unitId, unitChapters]) => (
-            <optgroup key={unitId} label={`第${unitId}单元`}>
-              {unitChapters.map((chapter) => (
-                <option key={chapter.id} value={chapter.id}>
-                  {chapter.name} {chapter.status === 'completed' ? '✓' : ''}
-                </option>
-              ))}
-            </optgroup>
+        <label className="form-label">学习类型</label>
+        <div className="type-selector">
+          {typeOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={`type-option ${type === option.value ? 'selected' : ''}`}
+              onClick={() => handleTypeChange(option.value as StudyType)}
+            >
+              <span className="type-icon">{option.icon}</span>
+              <span className="type-label">{option.label}</span>
+            </button>
           ))}
-        </select>
+        </div>
       </div>
+
+      {type === 'book' && (
+        <>
+          <div className="form-group">
+            <label className="form-label">书籍名称</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="例如：高等数学"
+              value={bookName}
+              onChange={(e) => setBookName(e.target.value)}
+            />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">总页数</label>
+              <input
+                type="number"
+                className="form-input"
+                min="1"
+                value={totalPages}
+                onChange={(e) => setTotalPages(Number(e.target.value))}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">当前页</label>
+              <input
+                type="number"
+                className="form-input"
+                min="1"
+                max={totalPages}
+                value={currentPage}
+                onChange={(e) => setCurrentPage(Number(e.target.value))}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {type === 'video' && (
+        <>
+          <div className="form-group">
+            <label className="form-label">视频名称</label>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="例如：数学分析第一讲"
+              value={videoName}
+              onChange={(e) => setVideoName(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">观看进度: {videoProgress}%</label>
+            <input
+              type="range"
+              className="progress-slider"
+              min="0"
+              max="100"
+              value={videoProgress}
+              onChange={(e) => setVideoProgress(Number(e.target.value))}
+              style={{ background: `linear-gradient(to right, #5B8DEF ${videoProgress}%, #E8ECF0 ${videoProgress}%)` }}
+            />
+            <div className="progress-markers">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="form-group">
         <label className="form-label">学习时长（分钟）</label>
@@ -89,7 +180,7 @@ export default function StudyRecordForm({ chapters, onSubmit, onCancel }: StudyR
             max="180"
             step="5"
             value={duration}
-            onChange={(e) => handleDurationChange(Number(e.target.value))}
+            onChange={(e) => setDuration(Number(e.target.value))}
           />
           <div className="duration-value">
             <input
@@ -98,7 +189,7 @@ export default function StudyRecordForm({ chapters, onSubmit, onCancel }: StudyR
               min="1"
               max="480"
               value={duration}
-              onChange={(e) => handleDurationChange(Number(e.target.value))}
+              onChange={(e) => setDuration(Number(e.target.value))}
             />
             <span>分钟</span>
           </div>
@@ -106,23 +197,24 @@ export default function StudyRecordForm({ chapters, onSubmit, onCancel }: StudyR
       </div>
 
       <div className="form-group">
-        <label className="form-label">学习内容</label>
+        <label className="form-label">学习内容/心得</label>
         <textarea
           className="form-textarea"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           placeholder="记录你今天学习的内容、心得、疑问..."
-          rows={6}
+          rows={4}
           required
         />
       </div>
 
       <div className="points-preview">
         <div className="points-preview-title">💡 预计可获得积分</div>
-        <div className="points-preview-value">+{estimatedPoints} 积分</div>
+        <div className="points-preview-value">+{calculatePoints()} 积分</div>
         <div className="points-preview-detail">
-          基础记录 {POINTS_RULES.RECORD_BASE} 分 + 学习时长 {duration * POINTS_RULES.PER_MINUTE} 分
-          {estimatedPoints > POINTS_RULES.RECORD_BASE + duration * POINTS_RULES.PER_MINUTE && ' + 额外奖励'}
+          基础 {POINTS_RULES.RECORD_BASE} 分 + 时长 {duration * POINTS_RULES.PER_MINUTE} 分
+          {type === 'book' && currentPage > 0 && ` + 书籍 ${POINTS_RULES.BOOK_BONUS} 分`}
+          {type === 'video' && videoProgress === 100 && ` + 完成 ${POINTS_RULES.VIDEO_COMPLETE_BONUS} 分`}
         </div>
         <div className="points-preview-hint">
           每日首次记录额外 +{POINTS_RULES.FIRST_RECORD_OF_DAY} 分，连续学习还有加成奖励！

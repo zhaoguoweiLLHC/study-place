@@ -22,6 +22,19 @@ export default function StudyRecords({ records, onDelete }: StudyRecordsProps) {
     return mins > 0 ? `${hours}小时${mins}分钟` : `${hours}小时`;
   };
 
+  const getTypeInfo = (type: string) => {
+    switch (type) {
+      case 'book':
+        return { icon: '📚', label: '书籍' };
+      case 'video':
+        return { icon: '🎥', label: '视频' };
+      case 'practice':
+        return { icon: '✏️', label: '练习' };
+      default:
+        return { icon: '📝', label: '其他' };
+    }
+  };
+
   // 按日期分组
   const groupedRecords = records.reduce((acc, record) => {
     const date = record.createdAt;
@@ -53,27 +66,49 @@ export default function StudyRecords({ records, onDelete }: StudyRecordsProps) {
               <span className="record-count">{groupedRecords[date].length} 条记录</span>
             </div>
             <div className="records-list">
-              {groupedRecords[date].map((record) => (
-                <div key={record.id} className="record-card">
-                  <div className="record-header">
-                    <div className="record-chapter">{record.chapterName}</div>
-                    <div className="record-points">+{record.points} 💎</div>
-                  </div>
-                  <div className="record-content">{record.content}</div>
-                  <div className="record-footer">
-                    <div className="record-meta">
-                      <span className="record-duration">⏱️ {formatDuration(record.duration)}</span>
+              {groupedRecords[date].map((record) => {
+                const typeInfo = getTypeInfo(record.type);
+                return (
+                  <div key={record.id} className="record-card">
+                    <div className="record-header">
+                      <div className="record-type-badge">
+                        <span>{typeInfo.icon}</span>
+                        <span>{typeInfo.label}</span>
+                      </div>
+                      <div className="record-points">+{record.points} 💎</div>
                     </div>
-                    <button
-                      className="btn-icon delete"
-                      onClick={() => onDelete(record.id)}
-                      title="删除记录"
-                    >
-                      🗑️
-                    </button>
+                    <div className="record-content">{record.title}</div>
+                    <div className="record-details">
+                      {record.type === 'book' && record.bookName && (
+                        <div className="record-detail-item">
+                          <span className="detail-label">📖 {record.bookName}</span>
+                          <span className="detail-value">
+                            第 {record.currentPage} / {record.totalPages} 页
+                          </span>
+                        </div>
+                      )}
+                      {record.type === 'video' && record.videoName && (
+                        <div className="record-detail-item">
+                          <span className="detail-label">🎬 {record.videoName}</span>
+                          <span className="detail-value">进度 {record.videoProgress}%</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="record-footer">
+                      <div className="record-meta">
+                        <span className="record-duration">⏱️ {formatDuration(record.duration)}</span>
+                      </div>
+                      <button
+                        className="btn-icon delete"
+                        onClick={() => onDelete(record.id)}
+                        title="删除记录"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))
