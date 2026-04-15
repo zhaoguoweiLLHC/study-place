@@ -1,31 +1,141 @@
 {
-  "records": [],
+  "records": [
+    {
+      "id": 1776242177426,
+      "type": "book",
+      "title": "了解了课程的性质和基本理念",
+      "duration": 30,
+      "bookName": "普通高中数学课程标准（2017年版2020年修订）",
+      "totalPages": 188,
+      "currentPage": 10,
+      "points": 67,
+      "createdAt": "2026-04-15"
+    }
+  ],
   "rewards": [
-    { "id": 1, "name": "30分钟游戏时间", "description": "兑换30分钟游戏时间", "cost": 50, "icon": "🎮", "category": "entertainment" },
-    { "id": 2, "name": "1小时游戏时间", "description": "兑换1小时游戏时间", "cost": 90, "icon": "🎮", "category": "entertainment" },
-    { "id": 3, "name": "看一集动漫", "description": "兑换看一集动漫的时间", "cost": 60, "icon": "📺", "category": "entertainment" },
-    { "id": 4, "name": "看一部电影", "description": "兑换看一部电影的时间", "cost": 150, "icon": "🎬", "category": "entertainment" },
-    { "id": 5, "name": "刷短视频30分钟", "description": "兑换刷短视频的时间", "cost": 40, "icon": "📱", "category": "entertainment" },
-    { "id": 6, "name": "一杯奶茶", "description": "奖励自己一杯奶茶", "cost": 100, "icon": "🧋", "category": "food" },
-    { "id": 7, "name": "一杯咖啡", "description": "奖励自己一杯咖啡", "cost": 80, "icon": "☕", "category": "food" },
-    { "id": 8, "name": "一顿外卖", "description": "奖励自己一顿外卖", "cost": 200, "icon": "🍔", "category": "food" },
-    { "id": 9, "name": "一份甜点", "description": "奖励自己一份甜点", "cost": 120, "icon": "🍰", "category": "food" },
-    { "id": 10, "name": "休息半天", "description": "兑换半天的自由时间", "cost": 300, "icon": "😴", "category": "rest" },
-    { "id": 11, "name": "睡个懒觉", "description": "允许明天睡到自然醒", "cost": 80, "icon": "🛏️", "category": "rest" },
-    { "id": 12, "name": "放松一小时", "description": "什么都不做，放松一小时", "cost": 100, "icon": "🧘", "category": "rest" },
-    { "id": 13, "name": "买一本新书", "description": "奖励自己买一本想看的书", "cost": 250, "icon": "📚", "category": "other" },
-    { "id": 14, "name": "买一个小礼物", "description": "奖励自己一个小礼物", "cost": 180, "icon": "🎁", "category": "other" }
+    {
+      "id": 1,
+      "name": "30分钟游戏时间",
+      "description": "兑换30分钟游戏时间",
+      "cost": 50,
+      "icon": "🎮",
+      "category": "entertainment"
+    },
+    {
+      "id": 2,
+      "name": "1小时游戏时间",
+      "description": "兑换1小时游戏时间",
+      "cost": 90,
+      "icon": "🎮",
+      "category": "entertainment"
+    },
+    {
+      "id": 3,
+      "name": "看一集动漫",
+      "description": "兑换看一集动漫的时间",
+      "cost": 60,
+      "icon": "📺",
+      "category": "entertainment"
+    },
+    {
+      "id": 4,
+      "name": "看一部电影",
+      "description": "兑换看一部电影的时间",
+      "cost": 150,
+      "icon": "🎬",
+      "category": "entertainment"
+    },
+    {
+      "id": 5,
+      "name": "刷短视频30分钟",
+      "description": "兑换刷短视频的时间",
+      "cost": 40,
+      "icon": "📱",
+      "category": "entertainment"
+    },
+    {
+      "id": 6,
+      "name": "一杯奶茶",
+      "description": "奖励自己一杯奶茶",
+      "cost": 100,
+      "icon": "🧋",
+      "category": "food"
+    },
+    {
+      "id": 7,
+      "name": "一杯咖啡",
+      "description": "奖励自己一杯咖啡",
+      "cost": 80,
+      "icon": "☕",
+      "category": "food"
+    },
+    {
+      "id": 8,
+      "name": "一顿外卖",
+      "description": "奖励自己一顿外卖",
+      "cost": 200,
+      "icon": "🍔",
+      "category": "food"
+    },
+    {
+      "id": 9,
+      "name": "一份甜点",
+      "description": "奖励自己一份甜点",
+      "cost": 120,
+      "icon": "🍰",
+      "category": "food"
+    },
+    {
+      "id": 10,
+      "name": "休息半天",
+      "description": "兑换半天的自由时间",
+      "cost": 300,
+      "icon": "😴",
+      "category": "rest"
+    },
+    {
+      "id": 11,
+      "name": "睡个懒觉",
+      "description": "允许明天睡到自然醒",
+      "cost": 80,
+      "icon": "🛏️",
+      "category": "rest"
+    },
+    {
+      "id": 12,
+      "name": "放松一小时",
+      "description": "什么都不做，放松一小时",
+      "cost": 100,
+      "icon": "🧘",
+      "category": "rest"
+    },
+    {
+      "id": 13,
+      "name": "买一本新书",
+      "description": "奖励自己买一本想看的书",
+      "cost": 250,
+      "icon": "📚",
+      "category": "other"
+    },
+    {
+      "id": 14,
+      "name": "买一个小礼物",
+      "description": "奖励自己一个小礼物",
+      "cost": 180,
+      "icon": "🎁",
+      "category": "other"
+    }
   ],
   "redemptions": [],
   "stats": {
-    "totalPoints": 0,
-    "availablePoints": 0,
-    "totalStudyTime": 0,
-    "currentStreak": 0,
-    "longestStreak": 0,
-    "lastStudyDate": null,
-    "totalRecords": 0,
-    "bookTime": 0,
+    "totalPoints": 67,
+    "availablePoints": 67,
+    "totalStudyTime": 30,
+    "currentStreak": 1,
+    "longestStreak": 1,
+    "lastStudyDate": "2026-04-15",
+    "totalRecords": 1,
+    "bookTime": 30,
     "videoTime": 0,
     "practiceTime": 0,
     "otherTime": 0

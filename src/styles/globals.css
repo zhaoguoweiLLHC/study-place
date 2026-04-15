@@ -231,7 +231,8 @@ body {
 
 .points-label {
   font-size: 14px;
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   margin-top: 4px;
 }
 
@@ -246,14 +247,15 @@ body {
   gap: 4px;
 }
 
-.detail-value {
+.points-detail-item .detail-value {
   font-size: 24px;
   font-weight: 600;
 }
 
-.detail-label {
-  font-size: 13px;
-  opacity: 0.85;
+.points-detail-item .detail-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* ===== 统计卡片 ===== */
@@ -1241,12 +1243,12 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-.detail-label {
+.record-detail-item .detail-label {
   font-size: 14px;
   color: var(--text-secondary);
 }
 
-.detail-value {
+.record-detail-item .detail-value {
   font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);

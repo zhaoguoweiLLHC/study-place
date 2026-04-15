@@ -36,6 +36,6 @@ export function readData(): AppData {
   return JSON.parse(data);
 }
 
-export function writeData( AppData): void {
+export function writeData(data: AppData): void {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
 }
