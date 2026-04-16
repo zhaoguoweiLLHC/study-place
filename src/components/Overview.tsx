@@ -1,7 +1,6 @@
 'use client';
 
 import { AppData } from '@/lib/types';
-import PointsCard from './PointsCard';
 
 interface OverviewProps {
    AppData;
@@ -11,7 +10,6 @@ export default function Overview({ data }: OverviewProps) {
   const today = new Date().toISOString().split('T')[0];
   const todayRecords = data.records.filter((r) => r.createdAt === today);
   const todayStudyTime = todayRecords.reduce((sum, r) => sum + r.duration, 0);
-  const todayPoints = todayRecords.reduce((sum, r) => sum + r.points, 0);
 
   const formatDuration = (minutes: number) => {
     if (minutes < 60) return `${minutes}分钟`;
@@ -35,24 +33,41 @@ export default function Overview({ data }: OverviewProps) {
     <>
       <header className="page-header">
         <h1>学习概览</h1>
-        <p className="page-subtitle">坚持学习，积累积分，兑换奖励</p>
+        <p className="page-subtitle">坚持学习，每天进步一点点</p>
       </header>
 
-      <PointsCard stats={data.stats} />
-
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">💎</div>
-          <div className="stat-info">
-            <span className="stat-value">{data.stats.totalPoints}</span>
-            <span className="stat-label">累计积分</span>
+      {/* 今日学习 - 突出显示 */}
+      <div className="today-highlight">
+        <div className="today-date">
+          <span className="today-weekday">{['周日', '周一', '周二', '周三', '周四', '周五', '周六'][new Date().getDay()]}</span>
+          <span className="today-date-num">{new Date().getDate()}</span>
+        </div>
+        <div className="today-main">
+          <div className="today-time">
+            <span className="today-time-value">{formatDuration(todayStudyTime)}</span>
+            <span className="today-time-label">今日学习</span>
+          </div>
+          <div className="today-divider"></div>
+          <div className="today-records-count">
+            <span className="today-count-value">{todayRecords.length}</span>
+            <span className="today-count-label">条记录</span>
           </div>
         </div>
+        {data.stats.currentStreak > 0 && (
+          <div className="streak-badge">
+            <span className="streak-icon">🔥</span>
+            <span className="streak-text">连续学习 {data.stats.currentStreak} 天</span>
+          </div>
+        )}
+      </div>
+
+      {/* 学习统计 */}
+      <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon">⏱️</div>
           <div className="stat-info">
             <span className="stat-value">{formatDuration(data.stats.totalStudyTime)}</span>
-            <span className="stat-label">总学习时长</span>
+            <span className="stat-label">累计学习时长</span>
           </div>
         </div>
         <div className="stat-card">
@@ -63,14 +78,22 @@ export default function Overview({ data }: OverviewProps) {
           </div>
         </div>
         <div className="stat-card">
-          <div className="stat-icon">🔥</div>
+          <div className="stat-icon">🎯</div>
           <div className="stat-info">
-            <span className="stat-value">{data.stats.currentStreak}</span>
-            <span className="stat-label">连续学习天数</span>
+            <span className="stat-value">{data.stats.longestStreak}</span>
+            <span className="stat-label">最长连续天数</span>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">💎</div>
+          <div className="stat-info">
+            <span className="stat-value">{data.stats.availablePoints}</span>
+            <span className="stat-label">可用积分</span>
           </div>
         </div>
       </div>
 
+      {/* 学习类型分布 */}
       <div className="study-type-stats">
         <h3 className="section-title">📊 学习类型分布</h3>
         <div className="type-stats-grid">
@@ -105,24 +128,7 @@ export default function Overview({ data }: OverviewProps) {
         </div>
       </div>
 
-      <div className="today-overview">
-        <h3 className="section-title">📅 今日学习</h3>
-        <div className="today-stats">
-          <div className="today-stat">
-            <span className="today-value">{formatDuration(todayStudyTime)}</span>
-            <span className="today-label">学习时长</span>
-          </div>
-          <div className="today-stat">
-            <span className="today-value">+{todayPoints}</span>
-            <span className="today-label">获得积分</span>
-          </div>
-          <div className="today-stat">
-            <span className="today-value">{todayRecords.length}</span>
-            <span className="today-label">学习记录</span>
-          </div>
-        </div>
-      </div>
-
+      {/* 最近学习记录 */}
       <div className="recent-records">
         <h3 className="section-title">📝 最近学习记录</h3>
         {recentRecords.length === 0 ? (
@@ -140,49 +146,13 @@ export default function Overview({ data }: OverviewProps) {
                   <div className="recent-record-title">{record.title || (record.type === 'book' ? record.bookName : record.videoName) || '学习记录'}</div>
                   <div className="recent-record-meta">
                     <span>⏱️ {formatDuration(record.duration)}</span>
-                    <span>+{record.points} 💎</span>
+                    <span className="record-date-text">{record.createdAt}</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
-
-      <div className="points-rules">
-        <h3 className="section-title">💡 积分规则</h3>
-        <div className="rules-list">
-          <div className="rule-item">
-            <span className="rule-icon">📝</span>
-            <span className="rule-text">记录学习内容</span>
-            <span className="rule-points">+10分</span>
-          </div>
-          <div className="rule-item">
-            <span className="rule-icon">⏱️</span>
-            <span className="rule-text">每分钟学习</span>
-            <span className="rule-points">+1分</span>
-          </div>
-          <div className="rule-item">
-            <span className="rule-icon">📚</span>
-            <span className="rule-text">书籍学习</span>
-            <span className="rule-points">+2分</span>
-          </div>
-          <div className="rule-item">
-            <span className="rule-icon">🎬</span>
-            <span className="rule-text">视频完成</span>
-            <span className="rule-points">+15分</span>
-          </div>
-          <div className="rule-item">
-            <span className="rule-icon">🌅</span>
-            <span className="rule-text">每日首次记录</span>
-            <span className="rule-points">+20分</span>
-          </div>
-          <div className="rule-item">
-            <span className="rule-icon">🔥</span>
-            <span className="rule-text">连续学习（每天）</span>
-            <span className="rule-points">+5分/天</span>
-          </div>
-        </div>
       </div>
     </>
   );

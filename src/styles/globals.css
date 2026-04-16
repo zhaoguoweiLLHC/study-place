@@ -196,67 +196,105 @@ body {
   color: var(--text-secondary);
 }
 
-/* ===== 积分卡片 ===== */
-.points-card {
+/* ===== 今日学习高亮 ===== */
+.today-highlight {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   border-radius: var(--radius);
-  padding: 28px;
+  padding: 28px 32px;
   color: white;
   margin-bottom: 32px;
   box-shadow: 0 8px 24px rgba(91, 141, 239, 0.3);
-}
-
-.points-main {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  gap: 32px;
 }
 
-.points-icon {
-  font-size: 48px;
+.today-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-right: 32px;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.points-info {
-  flex: 1;
+.today-weekday {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 4px;
 }
 
-.points-value {
+.today-date-num {
   font-size: 48px;
   font-weight: 700;
   line-height: 1;
 }
 
-.points-label {
+.today-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.today-time {
+  display: flex;
+  flex-direction: column;
+}
+
+.today-time-value {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.today-time-label {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  opacity: 0.9;
   margin-top: 4px;
 }
 
-.points-details {
-  display: flex;
-  gap: 40px;
+.today-divider {
+  width: 1px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
-.points-detail-item {
+.today-records-count {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
-.points-detail-item .detail-value {
-  font-size: 24px;
-  font-weight: 600;
+.today-count-value {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
 }
 
-.points-detail-item .detail-label {
+.today-count-label {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  opacity: 0.9;
+  margin-top: 4px;
 }
+
+.streak-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 24px;
+}
+
+.streak-icon {
+  font-size: 20px;
+}
+
+.streak-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ===== 积分卡片 ===== */
 
 /* ===== 统计卡片 ===== */
 .stats-grid {
@@ -295,7 +333,7 @@ body {
 
 .stat-card:nth-child(2) .stat-icon { background: linear-gradient(135deg, var(--success) 0%, #58D68D 100%); }
 .stat-card:nth-child(3) .stat-icon { background: linear-gradient(135deg, var(--warning) 0%, #F5B041 100%); }
-.stat-card:nth-child(4) .stat-icon { background: linear-gradient(135deg, var(--error) 0%, #EC7063 100%); }
+.stat-card:nth-child(4) .stat-icon { background: linear-gradient(135deg, #95A5A6 0%, #BDC3C7 100%); }
 
 .stat-info {
   display: flex;
@@ -310,38 +348,6 @@ body {
 }
 
 .stat-label {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-/* ===== 今日概览 ===== */
-.today-overview {
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 24px;
-  margin-bottom: 32px;
-  box-shadow: var(--shadow);
-}
-
-.today-stats {
-  display: flex;
-  gap: 40px;
-}
-
-.today-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.today-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--primary);
-}
-
-.today-label {
   font-size: 14px;
   color: var(--text-secondary);
 }
@@ -391,42 +397,8 @@ body {
   font-size: 14px;
 }
 
-/* ===== 积分规则 ===== */
-.points-rules {
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: var(--shadow);
-}
-
-.rules-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-.rule-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: var(--bg-main);
-  border-radius: var(--radius-sm);
-}
-
-.rule-icon {
-  font-size: 24px;
-}
-
-.rule-text {
-  flex: 1;
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.rule-points {
-  font-weight: 600;
-  color: var(--success);
+.record-date-text {
+  color: var(--text-light);
 }
 
 /* ===== 章节学习 ===== */
@@ -1131,11 +1103,19 @@ body {
     margin-left: 60px;
     padding: 24px;
   }
-  .points-details {
+  .today-highlight {
+    flex-wrap: wrap;
     gap: 20px;
   }
-  .today-stats {
+  .today-date {
+    padding-right: 20px;
+  }
+  .today-main {
     gap: 20px;
+  }
+  .streak-badge {
+    width: 100%;
+    justify-content: center;
   }
 }
 
@@ -1143,21 +1123,27 @@ body {
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  .points-details {
+  .today-highlight {
     flex-direction: column;
-    gap: 12px;
+    align-items: stretch;
+    text-align: center;
   }
-  .today-stats {
-    flex-direction: column;
-    gap: 16px;
+  .today-date {
+    flex-direction: row;
+    gap: 12px;
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 20px;
+    justify-content: center;
+  }
+  .today-main {
+    justify-content: center;
   }
   .chapters-list {
     grid-template-columns: 1fr;
   }
   .rewards-grid {
-    grid-template-columns: 1fr;
-  }
-  .rules-list {
     grid-template-columns: 1fr;
   }
   .form-row {
